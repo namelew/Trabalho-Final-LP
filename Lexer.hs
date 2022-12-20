@@ -4,6 +4,7 @@ import Data.Char
 
 data Ty = TBool
         | TNum
+        | TFun Ty Ty 
         deriving (Show, Eq)
 
 data Expr = BTrue
@@ -12,7 +13,12 @@ data Expr = BTrue
           | Add Expr Expr 
           | And Expr Expr 
           | If Expr Expr Expr 
-          deriving Show 
+          | Var String
+          | Lam String Ty Expr 
+          | App Expr Expr 
+          | Paren Expr
+          | Eq Expr Expr
+          deriving (Show, Eq)
 
 data Token = TokenTrue 
            | TokenFalse 
@@ -22,15 +28,31 @@ data Token = TokenTrue
            | TokenIf 
            | TokenThen
            | TokenElse 
+           | TokenVar String 
+           | TokenLam
+           | TokenColon
+           | TokenArrow 
+           | TokenLParen
+           | TokenRParen
+           | TokenBoolean
+           | TokenNumber
+           | TokenEq
            deriving Show 
+
+isToken :: Char -> Bool
+isToken c = elem c "->&|="
 
 lexer :: String -> [Token]
 lexer [] = [] 
+lexer ('+':cs) = TokenAdd : lexer cs 
+lexer ('\\':cs) = TokenLam : lexer cs
+lexer (':':cs) = TokenColon : lexer cs
+lexer ('(':cs) = TokenLParen : lexer cs
+lexer (')':cs) = TokenRParen : lexer cs
 lexer (c:cs) | isSpace c = lexer cs 
              | isDigit c = lexNum (c:cs)
              | isAlpha c = lexKW (c:cs)
-lexer ('+':cs) = TokenAdd : lexer cs 
-lexer ('&':cs) = TokenAnd : lexer cs
+             | isToken c = lexSymbol (c:cs)
 lexer _ = error "Lexical error: caracter inválido!"
 
 lexNum :: String -> [Token]
@@ -44,3 +66,13 @@ lexKW cs = case span isAlpha cs of
              ("if", rest)    -> TokenIf : lexer rest 
              ("then", rest)  -> TokenThen : lexer rest 
              ("else", rest)  -> TokenElse : lexer rest 
+             ("Bool", rest)  -> TokenBoolean : lexer rest 
+             ("Number", rest)  -> TokenNumber : lexer rest 
+             (var, rest)     -> TokenVar var : lexer rest 
+
+lexSymbol :: String -> [Token]
+lexSymbol cs = case span isToken cs of
+                   ("->", rest) -> TokenArrow  : lexer rest
+                   ("&&", rest) -> TokenAnd    : lexer rest
+                   ("==", rest) -> TokenEq     : lexer rest
+                   _ -> error "Lexical error: símbolo inválido!"
