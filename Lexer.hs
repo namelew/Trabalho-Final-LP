@@ -10,7 +10,11 @@ data Ty = TBool
 data Expr = BTrue
           | BFalse
           | Num Int 
-          | Add Expr Expr 
+          | Add Expr Expr
+          | Sub Expr Expr
+          | Mul Expr Expr
+          | Not Expr
+          | Or Expr Expr 
           | And Expr Expr 
           | If Expr Expr Expr 
           | Var String
@@ -18,13 +22,19 @@ data Expr = BTrue
           | App Expr Expr 
           | Paren Expr
           | Eq Expr Expr
+          | Gth Expr Expr
+          | Geq Expr Expr
           deriving (Show, Eq)
 
 data Token = TokenTrue 
            | TokenFalse 
            | TokenNum Int 
-           | TokenAdd 
+           | TokenAdd
+           | TokenSub
+           | TokenMul
+           | TokenNot 
            | TokenAnd
+           | TokenOr
            | TokenIf 
            | TokenThen
            | TokenElse 
@@ -37,14 +47,18 @@ data Token = TokenTrue
            | TokenBoolean
            | TokenNumber
            | TokenEq
+           | TokenGth
+           | TokenGeq
            deriving Show 
 
 isToken :: Char -> Bool
-isToken c = elem c "->&|="
+isToken c = elem c "->&|=!>"
 
 lexer :: String -> [Token]
 lexer [] = [] 
-lexer ('+':cs) = TokenAdd : lexer cs 
+lexer ('+':cs) = TokenAdd : lexer cs
+lexer ('-':cs) = TokenSub : lexer cs
+lexer ('*':cs) = TokenMul : lexer cs 
 lexer ('\\':cs) = TokenLam : lexer cs
 lexer (':':cs) = TokenColon : lexer cs
 lexer ('(':cs) = TokenLParen : lexer cs
@@ -74,5 +88,9 @@ lexSymbol :: String -> [Token]
 lexSymbol cs = case span isToken cs of
                    ("->", rest) -> TokenArrow  : lexer rest
                    ("&&", rest) -> TokenAnd    : lexer rest
+                   ("||", rest) -> TokenOr    : lexer rest
+                   ("!", rest) -> TokenNot    : lexer rest
                    ("==", rest) -> TokenEq     : lexer rest
+                   (">", rest) -> TokenGth     : lexer rest
+                   (">=", rest) -> TokenGeq     : lexer rest
                    _ -> error "Lexical error: símbolo inválido!"
