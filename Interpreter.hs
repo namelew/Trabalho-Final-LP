@@ -21,7 +21,10 @@ isvalue BTrue = True
 isvalue BFalse = True
 isvalue (Num _) = True
 isvalue (Lam _ _ _) = True 
-isvalue _ = False 
+isvalue _ = False
+
+toNum :: Expr -> Int
+toNum (Num x) = x
 
 step :: Expr -> Maybe Expr 
 step (Add (Num n1) (Num n2)) = Just (Num (n1 + n2))
@@ -31,10 +34,34 @@ step (Add (Num n1) e2) = case step e2 of
 step (Add e1 e2) = case step e1 of 
                      Just e1' -> Just (Add e1' e2)
                      _        -> Nothing 
+step (Sub (Num n1) (Num n2)) = Just (Num (n1 - n2))
+step (Sub (Num n1) e2) = case step e2 of 
+                           Just e2' -> Just (Sub (Num n1) e2')
+                           _        -> Nothing
+step (Sub e1 e2) = case step e1 of 
+                     Just e1' -> Just (Sub e1' e2)
+                     _        -> Nothing 
+step (Mul (Num n1) (Num n2)) = Just (Num (n1 * n2))
+step (Mul (Num n1) e2) = case step e2 of 
+                           Just e2' -> Just (Mul (Num n1) e2')
+                           _        -> Nothing
+step (Mul e1 e2) = case step e1 of 
+                     Just e1' -> Just (Mul e1' e2)
+                     _        -> Nothing 
 step (And BTrue e2) = Just e2 
 step (And BFalse _) = Just BFalse 
 step (And e1 e2) = case step e1 of 
                      Just e1' -> Just (And e1' e2)
+                     _        -> Nothing
+step (Or BFalse e2) = Just e2 
+step (Or BTrue _) = Just BTrue 
+step (Or e1 e2) = case step e1 of 
+                     Just e1' -> Just (Or e1' e2)
+                     _        -> Nothing
+step (Not BTrue) = Just BFalse
+step (Not BFalse) = Just BTrue
+step (Not e1) = case step e1 of 
+                     Just e1' -> Just (Not e1')
                      _        -> Nothing
 step (If BTrue e1 _) = Just e1 
 step (If BFalse _ e2) = Just e2 
@@ -58,6 +85,26 @@ step (Eq e1 e2) | isvalue e1 && isvalue e2 = if (e1 == e2) then
                                  _        -> Nothing
                 | otherwise = case step e1 of 
                                 Just e1' -> Just (Eq e1' e2)
+                                _        -> Nothing
+step (Geq e1 e2) | isvalue e1 && isvalue e2 = if ((toNum e1) >= (toNum e2)) then
+                                               Just BTrue 
+                                             else 
+                                               Just BFalse 
+                | isvalue e1 = case step e2 of 
+                                 Just e2' -> Just (Geq e1 e2')
+                                 _        -> Nothing
+                | otherwise = case step e1 of 
+                                Just e1' -> Just (Geq e1' e2)
+                                _        -> Nothing
+step (Gth e1 e2) | isvalue e1 && isvalue e2 = if ((toNum e1) > (toNum e2)) then
+                                               Just BTrue 
+                                             else 
+                                               Just BFalse 
+                | isvalue e1 = case step e2 of 
+                                 Just e2' -> Just (Gth e1 e2')
+                                 _        -> Nothing
+                | otherwise = case step e1 of 
+                                Just e1' -> Just (Gth e1' e2)
                                 _        -> Nothing 
 step e = Just e 
 
