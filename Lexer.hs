@@ -52,7 +52,7 @@ data Token = TokenTrue
            deriving Show 
 
 isToken :: Char -> Bool
-isToken c = elem c "->&|=!>"
+isToken c = elem c "->&|=!"
 
 lexer :: String -> [Token]
 lexer [] = [] 
