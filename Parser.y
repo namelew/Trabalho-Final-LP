@@ -28,6 +28,9 @@ import Lexer
     '\\'        { TokenLam }
     ':'         { TokenColon }
     "->"        { TokenArrow }
+    let         { TokenLet }
+    '='         { TokenAss }
+    in          { TokenIn }
     '('         { TokenLParen }
     ')'         { TokenRParen }
     Bool        { TokenBoolean }
@@ -35,13 +38,10 @@ import Lexer
 
 %nonassoc if then else
 %left '+' '-'
-%left '*'
-%left "&&"
-%left "||"
-%left '!'
-%left "=="
-%left ">="
-%left '>'
+%left '*' '/'
+%left "&&" "||"
+%right '!'
+%left "==" ">=" '>'
 
 %% 
 
@@ -57,6 +57,7 @@ Exp     : num                        { Num $1 }
         | '!' Exp                    { Not $2 }
         | if Exp then Exp else Exp   { If $2 $4 $6 }
         | '\\' var ':' Type "->" Exp { Lam $2 $4 $6 }
+        | let var '=' Exp in Exp     { Let $2 $4 $6 }
         | Exp Exp                    { App $1 $2 }
         | '(' Exp ')'                { Paren $2 }
         | Exp "==" Exp               { Eq $1 $3 }

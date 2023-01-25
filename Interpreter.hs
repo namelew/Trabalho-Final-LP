@@ -10,10 +10,16 @@ subst x n b@(Var v) = if v == x then
 subst x n (Lam v t b) = Lam v t (subst x n b)
 subst x n (App e1 e2) = App (subst x n e1) (subst x n e2)
 subst x n (Add e1 e2) = Add (subst x n e1) (subst x n e2)
+subst x n (Sub e1 e2) = Sub (subst x n e1) (subst x n e2)
+subst x n (Mul e1 e2) = Mul (subst x n e1) (subst x n e2)
 subst x n (And e1 e2) = And (subst x n e1) (subst x n e2)
+subst x n (Or e1 e2) = Or (subst x n e1) (subst x n e2)
+subst x n (Not e1) = Not (subst x n e1)
 subst x n (If e e1 e2) = If (subst x n e) (subst x n e1) (subst x n e2)
 subst x n (Paren e) = Paren (subst x n e)
 subst x n (Eq e1 e2) = Eq (subst x n e1) (subst x n e2)
+subst x n (Geq e1 e2) = Geq (subst x n e1) (subst x n e2)
+subst x n (Gth e1 e2) = Gth (subst x n e1) (subst x n e2)
 subst x n e = e 
 
 isvalue :: Expr -> Bool 
@@ -25,6 +31,8 @@ isvalue _ = False
 
 toNum :: Expr -> Int
 toNum (Num x) = x
+toNum BTrue = 1
+toNum BFalse = 0
 
 step :: Expr -> Maybe Expr 
 step (Add (Num n1) (Num n2)) = Just (Num (n1 + n2))
@@ -71,7 +79,8 @@ step (If e e1 e2) = case step e of
 step (App e1@(Lam x t b) e2) | isvalue e2 = Just (subst x e2 b)
                              | otherwise = case step e2 of 
                                              Just e2' -> Just (App e1 e2')
-                                             _        -> Nothing 
+                                             _        -> Nothing
+step (Let x n b) = Just (subst x n b)
 step (App e1 e2) = case step e1 of 
                      Just e1' -> Just (App e1' e2)
                      _        -> Nothing
