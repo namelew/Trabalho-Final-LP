@@ -20,6 +20,7 @@ data Expr = BTrue
           | Var String
           | Lam String Ty Expr 
           | App Expr Expr 
+          | Let String Expr Expr
           | Paren Expr
           | Eq Expr Expr
           | Gth Expr Expr
@@ -42,6 +43,9 @@ data Token = TokenTrue
            | TokenLam
            | TokenColon
            | TokenArrow 
+           | TokenLet
+           | TokenAss
+           | TokenIn
            | TokenLParen
            | TokenRParen
            | TokenBoolean
@@ -61,6 +65,7 @@ lexer ('-':cs) = TokenSub : lexer cs
 lexer ('*':cs) = TokenMul : lexer cs 
 lexer ('\\':cs) = TokenLam : lexer cs
 lexer (':':cs) = TokenColon : lexer cs
+lexer ('=':cs) = TokenAss : lexer cs
 lexer ('(':cs) = TokenLParen : lexer cs
 lexer (')':cs) = TokenRParen : lexer cs
 lexer (c:cs) | isSpace c = lexer cs 
@@ -80,6 +85,8 @@ lexKW cs = case span isAlpha cs of
              ("if", rest)    -> TokenIf : lexer rest 
              ("then", rest)  -> TokenThen : lexer rest 
              ("else", rest)  -> TokenElse : lexer rest 
+             ("let", rest)  -> TokenLet : lexer rest 
+             ("in", rest)  -> TokenIn : lexer rest 
              ("Bool", rest)  -> TokenBoolean : lexer rest 
              ("Number", rest)  -> TokenNumber : lexer rest 
              (var, rest)     -> TokenVar var : lexer rest 
