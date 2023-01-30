@@ -10,6 +10,7 @@ import Lexer
 
 %token
     num         { TokenNum $$ }
+    "->"        { TokenArrow }
     '+'         { TokenAdd }
     '-'         { TokenSub }
     '*'         { TokenMul }
@@ -27,7 +28,6 @@ import Lexer
     var         { TokenVar $$ }
     '\\'        { TokenLam }
     ':'         { TokenColon }
-    "->"        { TokenArrow }
     let         { TokenLet }
     '='         { TokenAss }
     in          { TokenIn }
