@@ -20,6 +20,7 @@ data Expr = BTrue
           | Var String
           | Lam String Ty Expr 
           | App Expr Expr 
+          | Pair Int Expr Expr
           | Let String Expr Expr
           | Paren Expr
           | Eq Expr Expr
@@ -41,11 +42,15 @@ data Token = TokenTrue
            | TokenElse 
            | TokenVar String 
            | TokenLam
+           | TokenDot
+           | TokenComma
            | TokenColon
            | TokenArrow 
            | TokenLet
            | TokenAss
            | TokenIn
+           | TokenLCurlyB
+           | TokenRCurlyB
            | TokenLParen
            | TokenRParen
            | TokenBoolean
@@ -66,6 +71,10 @@ lexer ('\\':cs) = TokenLam : lexer cs
 lexer (':':cs) = TokenColon : lexer cs
 lexer ('(':cs) = TokenLParen : lexer cs
 lexer (')':cs) = TokenRParen : lexer cs
+lexer ('.':cs) = TokenDot : lexer cs
+lexer (',':cs) = TokenComma : lexer cs
+lexer ('{':cs) = TokenLCurlyB : lexer cs
+lexer ('}':cs) = TokenRCurlyB : lexer cs
 lexer (c:cs) | isSpace c = lexer cs 
              | isDigit c = lexNum (c:cs)
              | isAlpha c = lexKW (c:cs)
@@ -93,12 +102,12 @@ lexSymbol :: String -> [Token]
 lexSymbol cs = case span isToken cs of
                    ("->", rest) -> TokenArrow  : lexer rest
                    ("&&", rest) -> TokenAnd    : lexer rest
-                   ("||", rest) -> TokenOr    : lexer rest
-                   ("!", rest) -> TokenNot    : lexer rest
-                   ("-", rest) -> TokenSub    : lexer rest
+                   ("||", rest) -> TokenOr     : lexer rest
+                   ("!", rest) -> TokenNot     : lexer rest
+                   ("-", rest) -> TokenSub     : lexer rest
                    ("==", rest) -> TokenEq     : lexer rest
                    (">", rest) -> TokenGth     : lexer rest
-                   (">=", rest) -> TokenGeq     : lexer rest
-                   ("=", rest) -> TokenAss    : lexer rest
+                   (">=", rest) -> TokenGeq    : lexer rest
+                   ("=", rest) -> TokenAss     : lexer rest
 
                    _ -> error "Lexical error: símbolo inválido!"
