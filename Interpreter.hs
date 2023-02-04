@@ -8,6 +8,7 @@ subst x n b@(Var v) = if v == x then
                       else 
                         b 
 subst x n (Lam v t b) = Lam v t (subst x n b)
+subst x n (Pair id e1 e2) = Pair id (subst x n e1) (subst x n e2) 
 subst x n (App e1 e2) = App (subst x n e1) (subst x n e2)
 subst x n (Add e1 e2) = Add (subst x n e1) (subst x n e2)
 subst x n (Sub e1 e2) = Sub (subst x n e1) (subst x n e2)
@@ -27,7 +28,10 @@ isvalue BTrue = True
 isvalue BFalse = True
 isvalue (Num _) = True
 isvalue (Lam _ _ _) = True 
-isvalue (Pair _ e1 e2) = if isvalue e1 && isvalue e2 then True else False
+isvalue (Pair id e1 e2) = case id of
+                            1 -> False
+                            2 -> False
+                            _ -> if isvalue e1 && isvalue e2 then True else False
 isvalue _ = False
 
 toNum :: Expr -> Int
