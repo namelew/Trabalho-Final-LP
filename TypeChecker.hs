@@ -9,6 +9,9 @@ typeof :: Ctx -> Expr -> Maybe Ty
 typeof _ BTrue = Just TBool 
 typeof _ BFalse = Just TBool 
 typeof _ (Num _) = Just TNum
+typeof ctx (Pair _ e1 e2) = case (typeof ctx e1, typeof ctx e2) of
+                              (Just _, Just _) -> Just TPair
+                              _                -> Nothing 
 typeof ctx (Add e1 e2) = case (typeof ctx e1, typeof ctx e2) of 
                            (Just TNum, Just TNum) -> Just TNum
                            _                       -> Nothing 

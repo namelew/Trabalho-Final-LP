@@ -4,6 +4,7 @@ import Data.Char
 
 data Ty = TBool
         | TNum
+        | TPair
         | TFun Ty Ty 
         deriving (Show, Eq)
 
