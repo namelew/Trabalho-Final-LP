@@ -27,6 +27,7 @@ isvalue BTrue = True
 isvalue BFalse = True
 isvalue (Num _) = True
 isvalue (Lam _ _ _) = True 
+isvalue (Pair _ e1 e2) = if isvalue e1 && isvalue e2 then True else False
 isvalue _ = False
 
 toNum :: Expr -> Int
@@ -114,7 +115,17 @@ step (Gth e1 e2) | isvalue e1 && isvalue e2 = if ((toNum e1) > (toNum e2)) then
                                  _        -> Nothing
                 | otherwise = case step e1 of 
                                 Just e1' -> Just (Gth e1' e2)
-                                _        -> Nothing 
+                                _        -> Nothing
+step (Pair id e1 e2) | isvalue e1 && isvalue e2 = case id of
+                                                    1 -> Just e1
+                                                    2 -> Just e2
+                                                    _ -> Just (Pair id e1 e2)
+                    | isvalue e1 = case step e2 of 
+                                    Just e2' -> Just (Pair id e1 e2')
+                                    _        -> Nothing
+                    | otherwise = case step e1 of 
+                                    Just e1' -> Just (Pair id e1' e2)
+                                    _        -> Nothing
 step e = Just e 
 
 eval :: Expr -> Expr 
