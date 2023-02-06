@@ -21,6 +21,7 @@ subst x n (Paren e) = Paren (subst x n e)
 subst x n (Eq e1 e2) = Eq (subst x n e1) (subst x n e2)
 subst x n (Geq e1 e2) = Geq (subst x n e1) (subst x n e2)
 subst x n (Gth e1 e2) = Gth (subst x n e1) (subst x n e2)
+subst x n (Let v e1 e2) = Let v (subst x n e1) (subst x n e2)
 subst x n e = e 
 
 isvalue :: Expr -> Bool 
